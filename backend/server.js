@@ -255,12 +255,18 @@ app.post('/api/send-outreach', async (req, res) => {
   if (!targetEmail || !emailDraft) {
     return res.status(400).json({ success: false, error: 'targetEmail and emailDraft are required' });
   }
-  const baseUrl = `http://localhost:${PORT}`;
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const host = req.headers.host;
+  const baseUrl = `${protocol}://${host}`;
   const result = await sendOutreachEmail(targetEmail, subject, emailDraft, baseUrl);
   res.json(result);
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend API running on http://localhost:${PORT}`);
-  console.log(`Stack: Node.js, Express, Puppeteer, Gemini, MongoDB, Nodemailer`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Backend API running on http://localhost:${PORT}`);
+    console.log(`Stack: Node.js, Express, Puppeteer, Gemini, MongoDB, Nodemailer`);
+  });
+}
+
+module.exports = app;

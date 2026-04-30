@@ -295,7 +295,8 @@ export default function App() {
     setSendingEmail(true);
     setEmailStatus(null);
     try {
-      const res = await fetch('http://localhost:5000/api/send-outreach', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${apiUrl}/api/send-outreach`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -317,8 +318,9 @@ export default function App() {
     setReportReady(false);
     setLogs([]);
 
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const steps = [
-      `[SYSTEM] Connecting to backend API (http://localhost:5000)...`,
+      `[SYSTEM] Connecting to backend API (${apiUrl})...`,
       `[COLLECT] Scraping public data for "${target}"...`,
       `[API] Connecting to Gemini Free Tier...`,
       `[PROCESS] Analyzing "${category}" market segments...`,
@@ -333,7 +335,7 @@ export default function App() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/analyze', {
+      const response = await fetch(`${apiUrl}/api/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ company: target, category: category })
