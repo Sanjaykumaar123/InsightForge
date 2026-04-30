@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Intelligence Engine</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-satellite-dish"></i>
+                <h1>MARKET_INTEL <span>// ENGINE</span></h1>
+            </div>
+            <div class="status">
+                <div class="status-dot"></div>
+                SYSTEM ONLINE
+            </div>
+        </header>
+
+        <main>
+            <section class="input-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-terminal"></i> INITIALIZE QUERY</h2>
+                </div>
+                <form id="intel-form">
+                    <div class="form-group">
+                        <label for="companyName">TARGET COMPANY</label>
+                        <input type="text" id="companyName" placeholder="e.g. OpenAI" required autocomplete="off">
+                        <div class="input-line"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">MARKET CATEGORY</label>
+                        <input type="text" id="category" placeholder="e.g. Artificial Intelligence Research" required autocomplete="off">
+                        <div class="input-line"></div>
+                    </div>
+                    <button type="submit" class="btn-radium">
+                        <span>EXECUTE ANALYSIS</span>
+                        <i class="fa-solid fa-bolt"></i>
+                    </button>
+                </form>
+            </section>
+
+            <section id="loading-overlay" class="hidden">
+                <div class="radium-loader">
+                    <div class="core"></div>
+                    <div class="ring"></div>
+                    <div class="ring-2"></div>
+                </div>
+                <h3 class="loading-text">EXTRACTING SIGNALS...</h3>
+                <div class="log-output" id="loading-logs">
+                    [SYSTEM] Initializing ingestion...<br>
+                </div>
+            </section>
+
+            <section id="report-dashboard" class="hidden">
+                <div class="dashboard-header">
+                    <h2><i class="fa-solid fa-chart-network"></i> INTELLIGENCE REPORT</h2>
+                    <div class="target-info">
+                        TARGET: <span id="display-target" class="radium-text"></span> | CATEGORY: <span id="display-category" class="radium-text"></span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-icon"><i class="fa-solid fa-download"></i> EXPORT</button>
+                        <button class="btn-icon"><i class="fa-solid fa-share-nodes"></i> SHARE</button>
+                    </div>
+                </div>
+
+                <div class="grid-layout">
+                    <!-- 1. Company Overview -->
+                    <div class="card span-2">
+                        <div class="card-header">
+                            <i class="fa-solid fa-building"></i>
+                            <h3>01. COMPANY OVERVIEW</h3>
+                        </div>
+                        <div class="card-body" id="out-overview"></div>
+                    </div>
+
+                    <!-- 2. Market Position -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <h3>02. MARKET POSITION</h3>
+                        </div>
+                        <div class="card-body" id="out-market"></div>
+                    </div>
+
+                    <!-- 3. Competitor Mapping -->
+                    <div class="card span-2">
+                        <div class="card-header">
+                            <i class="fa-solid fa-chess-knight"></i>
+                            <h3>03. COMPETITOR MAPPING</h3>
+                        </div>
+                        <div class="card-body" id="out-competitors"></div>
+                    </div>
+
+                    <!-- 4. Brand Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <h3>04. BRAND ACTIVITY</h3>
+                        </div>
+                        <div class="card-body" id="out-brand"></div>
+                    </div>
+
+                    <!-- 5. Experiential -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-globe"></i>
+                            <h3>05. EVENTS FOOTPRINT</h3>
+                        </div>
+                        <div class="card-body" id="out-events"></div>
+                    </div>
+
+                    <!-- 6. Watchouts -->
+                    <div class="card outline-warning">
+                        <div class="card-header warning-text">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <h3>06. STRATEGIC WATCHOUTS</h3>
+                        </div>
+                        <div class="card-body" id="out-watchouts"></div>
+                    </div>
+
+                    <!-- 7. Decision Makers -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-users-viewfinder"></i>
+                            <h3>07. DECISION-MAKERS</h3>
+                        </div>
+                        <div class="card-body" id="out-decision-makers"></div>
+                    </div>
+
+                    <!-- 8. Contact Intel -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-address-book"></i>
+                            <h3>08. CONTACT INTEL</h3>
+                        </div>
+                        <div class="card-body" id="out-contact"></div>
+                    </div>
+
+                    <!-- 9. Personalized Outreach -->
+                    <div class="card span-2">
+                        <div class="card-header">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                            <h3>09. PERSONALIZED OUTREACH</h3>
+                        </div>
+                        <div class="card-body" id="out-outreach"></div>
+                    </div>
+
+                    <!-- 10. Logic & Workflow -->
+                    <div class="card span-2 highlight-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-microchip"></i>
+                            <h3>10. TRACKING & ARCHITECTURE</h3>
+                        </div>
+                        <div class="card-body" id="out-architecture"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
