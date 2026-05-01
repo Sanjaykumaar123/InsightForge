@@ -300,7 +300,7 @@ export default function App() {
     setSendingEmail(true);
     setEmailStatus(null);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
       const res = await fetch(`${apiUrl}/api/send-outreach`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -323,7 +323,7 @@ export default function App() {
     setReportReady(false);
     setLogs([]);
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
     const steps = [
       `[SYSTEM] Connecting to backend API (${apiUrl})...`,
       `[COLLECT] Scraping public data for "${target}"...`,

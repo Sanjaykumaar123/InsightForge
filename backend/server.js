@@ -5,7 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer'); // Removed for Vercel compatibility (not used)
 const axios = require('axios');
 const cheerio = require('cheerio');
 const nodemailer = require('nodemailer');
@@ -437,7 +437,7 @@ app.post('/api/send-outreach', async (req, res) => {
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Backend API running on http://localhost:${PORT}`);
-    console.log(`Stack: Node.js, Express, Puppeteer, Gemini, MongoDB, Nodemailer`);
+    console.log(`Stack: Node.js, Express, Gemini, MongoDB, Nodemailer`);
   });
 }
 
