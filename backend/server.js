@@ -259,78 +259,87 @@ async function generateInsights(companyData, category, companyName) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const prompt = `You are an elite AI-powered Market Intelligence Engine producing a consulting-grade report.
-Analyze the company below using the scraped data AND your own knowledge.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `You are an elite AI-powered Market Intelligence Engine.
+Analyze the company below using the provided context and your internal knowledge.
 
 Company Name: ${companyName}
 Category: ${category}
-Scraped Data Context: ${JSON.stringify(companyData)}
+Scraped Context: ${JSON.stringify(companyData)}
 
-Return ONLY a valid JSON object with EXACTLY these keys (no markdown, no code blocks):
+IMPORTANT: Return ONLY a valid JSON object. Do not include markdown formatting, backticks, or any text outside the JSON.
+
+Expected JSON Structure:
 {
-  "businessModel": "Detailed description of how the company makes money",
-  "revenueScale": "Revenue figures, growth rate, valuation if known",
-  "geographicPresence": "Cities, countries, regions of operation",
-  "coreOfferings": "All major products/services with brief descriptions",
-  "positioningStatement": "How the company positions itself vs competitors",
-  "brandPerception": "How consumers and industry perceive this brand",
-  "targetAudience": "Detailed segmentation: demographics, psychographics, use cases",
-  "recentShifts": "Strategic pivots and business model changes in last 12-24 months",
-  "strategicWatchouts": ["Risk 1 with specific detail", "Risk 2", "Risk 3", "Risk 4", "Risk 5"],
+  "businessModel": "string",
+  "revenueScale": "string",
+  "geographicPresence": "string",
+  "coreOfferings": "string",
+  "positioningStatement": "string",
+  "brandPerception": "string",
+  "targetAudience": "string",
+  "recentShifts": "string",
+  "strategicWatchouts": ["string"],
   "competitors": [
     {
-      "name": "Competitor Name",
-      "positioning": "How they position themselves in the market",
-      "strengths": "Their key competitive advantages",
-      "weaknesses": "Where they are weak compared to ${companyName}",
-      "marketActivity": "Recent campaigns, launches, or strategic moves"
+      "name": "string",
+      "positioning": "string",
+      "strengths": "string",
+      "weaknesses": "string",
+      "marketActivity": "string"
     }
   ],
   "competitiveGapAnalysis": {
-    "whereLeads": ["Area where ${companyName} is ahead", "Another strength"],
-    "whereLags": ["Area where ${companyName} is behind", "Another weakness"],
-    "opportunities": ["Market opportunity 1", "Opportunity 2"]
+    "whereLeads": ["string"],
+    "whereLags": ["string"],
+    "opportunities": ["string"]
   },
-  "brandCampaigns": ["Specific campaign name and description", "Another specific campaign"],
-  "corporateMilestones": ["Funding round / acquisition / IPO / major hire with year", "Another milestone"],
-  "experientialEvents": ["Specific event, sponsorship, or activation", "Another event"],
+  "brandCampaigns": ["string"],
+  "corporateMilestones": ["string"],
+  "experientialEvents": ["string"],
   "decisionMakers": [
     {
-      "name": "Full Name",
-      "role": "Exact Title",
-      "linkedin": "linkedin.com/in/their-profile or Not publicly available",
-      "context": "Why they are relevant and what decisions they influence"
+      "name": "string",
+      "role": "string",
+      "linkedin": "string",
+      "context": "string"
     }
   ],
   "contactIntelligence": {
-    "emailPattern": "firstname.lastname@company.com or Not publicly available",
-    "linkedinCompanyPage": "linkedin.com/company/companyname",
-    "bestOutreachChannel": "LinkedIn / Email / Twitter"
+    "emailPattern": "string",
+    "linkedinCompanyPage": "string",
+    "bestOutreachChannel": "string"
   },
-  "linkedinHook": "A sharp, specific LinkedIn message under 150 words that mentions a specific recent activity (e.g. Instamart expansion, Blinkit). NO generic phrases like 'I noticed your company'. Make it punchy and relevant.",
-  "emailDraft": "A complete professional email with Subject line, greeting, 2-3 specific paragraphs referencing REAL activities (campaigns, pivots), a clear ask, and sign-off. Reference specific brand activities and recent shifts."
-}
-Rules: 
-- Use specific facts, not vague statements like 'extensive campaigns'
-- For competitors, include ALL major ones with the full nested object
-- Separate brand campaigns from corporate events clearly
-- Email draft must have 'Subject:' as its first line
-- LinkedIn hook must mention a specific recent activity of the company`;
+  "linkedinHook": "string",
+  "emailDraft": "string"
+}`;
 
-    console.log(`[Backend] Requesting AI insights from Gemini...`);
+    console.log(`[Backend] Requesting AI insights from Gemini (gemini-1.5-flash)...`);
     const result = await model.generateContent(prompt);
-    console.log(`[Backend] Received AI insights!`);
-    let text = result.response.text();
-    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    console.log(`[Backend] Received response from Gemini.`);
     
-    return { status: "success", insights: JSON.parse(text) };
+    let text = result.response.text();
+    // More robust JSON cleaning
+    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    if (text.includes('{') && text.includes('}')) {
+        const start = text.indexOf('{');
+        const end = text.lastIndexOf('}');
+        text = text.substring(start, end + 1);
+    }
+    
+    try {
+        const parsed = JSON.parse(text);
+        return { status: "success", insights: parsed };
+    } catch (parseError) {
+        console.error("[Backend] JSON Parse Error. Raw text:", text);
+        throw new Error("AI returned invalid JSON format.");
+    }
   } catch (error) {
-    console.error("[Backend] Gemini Error:", error);
+    console.error("[Backend] generateInsights Error:", error.message);
     return {
-      status: "fallback",
+      status: "error",
       insights: getFallbackInsights(companyName, category),
-      message: error.message || 'Gemini unavailable. Fallback intelligence returned.'
+      message: error.message || 'Gemini processing failed.'
     };
   }
 }
