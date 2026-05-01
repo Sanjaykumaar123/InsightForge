@@ -395,12 +395,26 @@ async function sendOutreachEmail(targetEmail, subject, htmlContent, trackingBase
   }
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Use SSL
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS  // Gmail App Password (16 chars, no spaces)
+      pass: process.env.EMAIL_PASS
+    },
+    tls: {
+      rejectUnauthorized: false // Helps in some cloud environments
     }
   });
+
+  // Verify connection configuration
+  try {
+    await transporter.verify();
+    console.log('[Outreach] Transporter verified and ready.');
+  } catch (verifyErr) {
+    console.error('[Outreach] Transporter verification failed:', verifyErr.message);
+    return { success: false, message: 'Email server connection failed: ' + verifyErr.message };
+  }
 
   // Embed 1x1 tracking pixel at end of email body
   const trackingPixel = `<img src="${trackingBaseUrl}/api/track?email=${encodeURIComponent(targetEmail)}" width="1" height="1" style="display:none" />`;
