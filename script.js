@@ -25,23 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
         simulateIngestionAndExtraction(companyName, category);
     });
 
-    function simulateIngestionAndExtraction(companyName, category) {
+    async function simulateIngestionAndExtraction(companyName, category) {
         const logs = [
             `[SYSTEM] Initializing Market Intelligence Engine...`,
             `[COLLECT] Scraping public data for "${companyName}"...`,
             `[API] Connecting to Gemini Free Tier for NLP extraction...`,
             `[PROCESS] Analyzing "${category}" market segments...`,
-            `[NLP] Entity extraction and sentiment analysis active...`,
-            `[DETECT] Identifying key competitors and market gaps...`,
-            `[LEAD] Scanning LinkedIn public profiles for decision-makers...`,
-            `[GENERATE] Crafting personalized outreach logic...`,
-            `[VALIDATE] Quality check passed. Removing fluff...`,
-            `[SYSTEM] Report generation complete.`
+            `[SYSTEM] Waiting for API response...`
         ];
         
         logsContainer.innerHTML = '';
         let step = 0;
         
+        // Show initial logs
         const logInterval = setInterval(() => {
             if (step < logs.length) {
                 logsContainer.innerHTML += `<div>${logs[step]}</div>`;
@@ -49,127 +45,137 @@ document.addEventListener('DOMContentLoaded', () => {
                 step++;
             } else {
                 clearInterval(logInterval);
+            }
+        }, 600);
+
+        try {
+            const apiUrl = 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ company: companyName, category: category })
+            });
+            const data = await response.json();
+            
+            if (data.success && data.data && data.data.insights && data.data.insights.insights) {
+                const report = data.data.insights.insights;
+                logsContainer.innerHTML += `<div style="color: #39FF14">[SUCCESS] Received data from backend!</div>`;
                 setTimeout(() => {
                     loadingOverlay.classList.add('hidden');
-                    populateReport(companyName, category);
+                    populateReport(companyName, category, report);
                     dashboard.classList.remove('hidden');
                 }, 1000);
+            } else {
+                throw new Error(data.error || 'Failed to get insights');
             }
-        }, 600); // Simulated delay for each log
+        } catch (err) {
+            logsContainer.innerHTML += `<div style="color: #ff4444">[ERROR] ${err.message}</div>`;
+            setTimeout(() => {
+                loadingOverlay.classList.add('hidden');
+                document.querySelector('.input-panel').style.display = 'block';
+            }, 3000);
+        }
     }
 
-    function populateReport(company, category) {
+    function populateReport(company, category, report) {
         // 1. Company Overview
         document.getElementById('out-overview').innerHTML = `
             <div class="metric-box">
                 <div class="metric-title">Business Model</div>
-                <div class="metric-value">B2B SaaS / Hybrid</div>
+                <div class="metric-value">${report.businessModel || 'N/A'}</div>
             </div>
-            <p><strong>Revenue Scale:</strong> <span class="tag">Inference</span> $50M - $100M ARR</p>
-            <p><strong>Geographic Presence:</strong> North America, Western Europe (Expanding to APAC)</p>
-            <p><strong>Core Offerings:</strong> AI-driven analytics, automated reporting tools, data pipeline management.</p>
-            <p><strong>Positioning Statement:</strong> "The data nervous system for high-growth tech enterprises."</p>
+            <p><strong>Revenue Scale:</strong> <span class="tag">Inference</span> ${report.revenueScale || 'N/A'}</p>
+            <p><strong>Geographic Presence:</strong> ${report.geographicPresence || 'N/A'}</p>
+            <p><strong>Core Offerings:</strong> ${report.coreOfferings || 'N/A'}</p>
+            <p><strong>Positioning Statement:</strong> "${report.positioningStatement || 'N/A'}"</p>
         `;
 
         // 2. Market Position
         document.getElementById('out-market').innerHTML = `
-            <p><strong>Brand Perception:</strong> Premium, disruptive, technically robust.</p>
-            <p><strong>Target Audience:</strong> Enterprise CTOs, VP of Data, Enterprise Architects.</p>
+            <p><strong>Brand Perception:</strong> ${report.brandPerception || 'N/A'}</p>
+            <p><strong>Target Audience:</strong> ${report.targetAudience || 'N/A'}</p>
             <div class="metric-box">
                 <div class="metric-title">Recent Shifts (Last 12 Months)</div>
-                <div class="metric-value">Product Pivot</div>
+                <div class="metric-value">${report.recentShifts || 'N/A'}</div>
             </div>
-            <p>Shifted messaging from "Data Storage" to "Active Intelligence" following recent Series C funding round.</p>
         `;
 
         // 3. Competitor Mapping
-        document.getElementById('out-competitors').innerHTML = `
-            <div class="competitor-row">
-                <div><strong>Competitor A</strong><br><span class="tag">Legacy</span></div>
-                <div><strong>Strengths:</strong> Deep enterprise penetration.</div>
-                <div><strong>Weaknesses:</strong> Slow deployment, outdated UI.</div>
-            </div>
-            <div class="competitor-row">
-                <div><strong>Competitor B</strong><br><span class="tag">Disruptor</span></div>
-                <div><strong>Strengths:</strong> PLG motion, agile.</div>
-                <div><strong>Weaknesses:</strong> Limited enterprise governance features.</div>
-            </div>
-            <div class="metric-box" style="margin-top: 1.5rem;">
-                <div class="metric-title">Competitive Gap Analysis</div>
-                <p style="margin-top:0.5rem; font-size: 0.9rem;"><strong>Opportunity:</strong> ${company} leads in real-time streaming but lags in native multi-cloud deployments. Untapped opportunity in the mid-market segment requiring out-of-the-box compliance tools.</p>
-            </div>
-        `;
+        let compHtml = '';
+        if (report.competitors && Array.isArray(report.competitors)) {
+            report.competitors.forEach(comp => {
+                compHtml += `
+                    <div class="competitor-row">
+                        <div><strong>${comp.name}</strong></div>
+                        <div><strong>Strengths:</strong> ${comp.strengths || 'N/A'}</div>
+                        <div><strong>Weaknesses:</strong> ${comp.weaknesses || 'N/A'}</div>
+                    </div>
+                `;
+            });
+        }
+        
+        let gapHtml = '';
+        if (report.competitiveGapAnalysis) {
+            gapHtml = `
+                <div class="metric-box" style="margin-top: 1.5rem;">
+                    <div class="metric-title">Competitive Gap Analysis</div>
+                    <p style="margin-top:0.5rem; font-size: 0.9rem;"><strong>Opportunities:</strong> ${report.competitiveGapAnalysis.opportunities?.join(', ') || 'N/A'}</p>
+                </div>
+            `;
+        }
+        document.getElementById('out-competitors').innerHTML = compHtml + gapHtml;
 
         // 4. Brand Activity
+        const brand = report.brandCampaigns || report.brandActivity || [];
         document.getElementById('out-brand').innerHTML = `
             <ul>
-                <li><strong>Campaign:</strong> "Data Without Borders" (Q3) - Focused on multi-region capabilities. High digital engagement.</li>
-                <li><strong>Product Launch:</strong> "Auto-Sync 2.0" - Introduced AI-based anomaly detection.</li>
-                <li><strong>Social Direction:</strong> Heavy reliance on LinkedIn thought leadership from founders. Low visual content output.</li>
+                ${brand.map(b => `<li>${b}</li>`).join('')}
             </ul>
         `;
 
         // 5. Experiential Footprint
+        const events = report.experientialEvents || report.events || [];
         document.getElementById('out-events').innerHTML = `
             <ul>
-                <li><strong>Event:</strong> AWS re:Invent (Sponsor) - Hybrid format. High lead generation output.</li>
-                <li><strong>Event:</strong> Local Tech Meetups (SF/NY) - Intimate developer-focused sessions.</li>
-                <li><strong>Outcome:</strong> Strong community feedback, resulting in 30% increase in developer portal signups.</li>
+                ${events.map(e => `<li>${e}</li>`).join('')}
             </ul>
         `;
 
         // 6. Strategic Watchouts
+        const watchouts = report.strategicWatchouts || [];
         document.getElementById('out-watchouts').innerHTML = `
             <ul>
-                <li><strong>Market Risks:</strong> Commoditization of base-level data pipelines by cloud providers.</li>
-                <li><strong>Brand Inconsistencies:</strong> Disconnect between premium enterprise pricing and self-serve PLG website experience.</li>
-                <li><strong>Missed Opportunities:</strong> Lack of vertical-specific messaging (e.g., Healthcare, FinTech).</li>
+                ${watchouts.map(w => `<li>${w}</li>`).join('')}
             </ul>
         `;
 
         // 7. Decision Makers
-        document.getElementById('out-decision-makers').innerHTML = `
-            <ul>
-                <li><strong>Alex Mercer</strong> - CMO <em>(Drives GTM strategy)</em></li>
-                <li><strong>Jordan Hayes</strong> - VP of Growth <em>(Focuses on PLG and funnel optimization)</em></li>
-                <li><span class="tag">Inference</span> Head of Product Marketing - <em>Role identified, individual not publicly confirmed</em></li>
-            </ul>
-        `;
+        let dmHtml = '<ul>';
+        if (report.decisionMakers && Array.isArray(report.decisionMakers)) {
+            report.decisionMakers.forEach(dm => {
+                dmHtml += `<li><strong>${dm.name}</strong> - ${dm.role} <em>(${dm.context})</em></li>`;
+            });
+        }
+        dmHtml += '</ul>';
+        document.getElementById('out-decision-makers').innerHTML = dmHtml;
 
         // 8. Contact Intel
+        const contact = report.contactIntelligence || {};
         document.getElementById('out-contact').innerHTML = `
-            <p><i class="fa-solid fa-envelope"></i> a.mercer@${company.toLowerCase().replace(/\s/g, '')}.com <span class="tag">Verified</span></p>
-            <p><i class="fa-brands fa-linkedin"></i> linkedin.com/in/alexmercer-growth</p>
-            <p class="data-unavailable"><i class="fa-solid fa-phone"></i> Phone: Not publicly available</p>
+            <p><i class="fa-solid fa-envelope"></i> ${contact.emailPattern || contact.email || 'Not publicly available'} <span class="tag">Verified</span></p>
+            <p><i class="fa-brands fa-linkedin"></i> ${contact.linkedinCompanyPage || contact.linkedin || 'Not publicly available'}</p>
+            <p><i class="fa-solid fa-satellite-dish"></i> Best Channel: ${contact.bestOutreachChannel || 'LinkedIn'}</p>
         `;
 
         // 9. Personalized Outreach
         document.getElementById('out-outreach').innerHTML = `
             <div style="margin-bottom: 1.5rem;">
                 <strong><i class="fa-brands fa-linkedin"></i> LinkedIn Hook:</strong>
-                <div class="email-draft">
-"Hi Alex, loved your recent talk at AWS re:Invent on 'Active Intelligence'. 
-Noticed ${company} is scaling its enterprise tier rapidly. 
-We've helped similar data-infrastructure companies increase enterprise MQLs by 40% through vertical-specific GTM plays. 
-Open to a brief chat on how we could apply this to your upcoming APAC expansion?"
-                </div>
+                <div class="email-draft">${report.linkedinHook || 'N/A'}</div>
             </div>
             <div>
                 <strong><i class="fa-solid fa-envelope"></i> Email Draft:</strong>
-                <div class="email-draft">
-<strong>Subject:</strong> Capitalizing on the "Auto-Sync 2.0" momentum
-
-Hi Alex,
-
-Following the successful launch of Auto-Sync 2.0, I noticed ${company} is perfectly positioned to capture the mid-market segment currently underserved by legacy competitors.
-
-However, scaling that GTM requires highly targeted, vertical-specific messaging. We've built a framework that identifies and converts these exact mid-market gaps.
-
-Would you be open to a 10-minute overview next Tuesday to see if this aligns with your Q4 pipeline goals?
-
-Best,
-[Your Name]
-                </div>
+                <div class="email-draft">${(report.emailDraft || 'N/A').replace(/\n/g, '<br>')}</div>
             </div>
         `;
 
@@ -181,17 +187,17 @@ Best,
                     <ol style="margin-top: 0.5rem; font-size: 0.85rem;">
                         <li>User inputs Target & Category</li>
                         <li>Puppeteer cluster scrapes public signals</li>
-                        <li>Gemini Free Tier processes NLP (Entity/Sentiment)</li>
+                        <li>Gemini 2.5 Flash processes NLP</li>
                         <li>JSON payload generated</li>
-                        <li>React/Vite Frontend renders UI</li>
+                        <li>Dynamic Dashboard renders UI</li>
                     </ol>
                 </div>
                 <div>
                     <strong><i class="fa-solid fa-satellite"></i> Tracking Logic</strong>
                     <ul style="margin-top: 0.5rem; font-size: 0.85rem;">
-                        <li><strong>Open Rate:</strong> Invisible 1x1 pixel via SendGrid API</li>
-                        <li><strong>Click Tracking:</strong> UTM params (utm_source=outreach)</li>
-                        <li><strong>CRM:</strong> Webhook sync to HubSpot/Salesforce</li>
+                        <li><strong>Open Rate:</strong> Invisible 1x1 pixel</li>
+                        <li><strong>Click Tracking:</strong> UTM params</li>
+                        <li><strong>CRM:</strong> MongoDB Atlas Storage</li>
                     </ul>
                 </div>
             </div>

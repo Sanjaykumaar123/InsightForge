@@ -19,6 +19,11 @@ function TypewriterEffect({ text }) {
   return <span>{displayText}</span>;
 }
 
+const safeRender = (val) => {
+  if (typeof val === 'object' && val !== null) return JSON.stringify(val);
+  return val || 'N/A';
+};
+
 export default function App() {
   const [target, setTarget] = useState('');
   const [category, setCategory] = useState('');
@@ -173,7 +178,7 @@ export default function App() {
     if (reportData.competitors?.length) {
       sectionHeader('03.  COMPETITOR MAPPING');
       reportData.competitors.forEach(c => {
-        fieldRow(c.name || 'Competitor', c.context);
+        fieldRow(c.name || 'Competitor', c.positioning || c.context || 'Strategic Competitor');
       });
     }
 
@@ -344,7 +349,13 @@ export default function App() {
       const data = await response.json();
       console.log("Backend Response:", data);
       
-      if(data.success && data.data && data.data.insights) {
+      if (!data.success) {
+        setLogs(prev => [...prev, `[ERROR] Backend Error: ${data.error || 'Unknown error'}`]);
+        setLoading(false);
+        return;
+      }
+
+      if(data.data && data.data.insights) {
         if (data.data.insights.status === "error") {
           setLogs(prev => [...prev, `[ERROR] AI API Error: ${data.data.insights.message}`]);
           setTimeout(() => setLoading(false), 2000);
@@ -353,15 +364,19 @@ export default function App() {
         
         if (data.data.insights.insights) {
           setReportData(data.data.insights.insights);
+          setLogs(prev => [...prev, `[SUCCESS] Received data from backend! Rendering UI.`]);
+          setTimeout(() => {
+            setLoading(false);
+            setReportReady(true);
+          }, 1000);
+        } else {
+          setLogs(prev => [...prev, `[ERROR] Received malformed data from AI.`]);
+          setLoading(false);
         }
-      }
-      
-      setLogs(prev => [...prev, `[SUCCESS] Received data from backend! Rendering UI.`]);
-      
-      setTimeout(() => {
+      } else {
+        setLogs(prev => [...prev, `[ERROR] Backend returned success but no data.`]);
         setLoading(false);
-        setReportReady(true);
-      }, 1000);
+      }
 
     } catch (err) {
       console.error(err);
@@ -578,12 +593,12 @@ export default function App() {
               <div className="p-6 text-gray-300 text-sm flex-grow">
                 <div className="bg-dark-surface p-4 rounded border-l-2 border-radium-primary mb-4">
                   <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Business Model</div>
-                  <div className="text-lg text-white font-semibold">{reportData?.businessModel || 'Loading...'}</div>
+                  <div className="text-lg text-white font-semibold">{safeRender(reportData?.businessModel)}</div>
                 </div>
-                <p className="mb-2"><strong className="text-white">Revenue Scale:</strong> <span className="inline-block px-2 py-1 bg-radium-faint border border-radium-glow rounded text-xs text-radium-primary mx-2 font-heading">Inference</span> {reportData?.revenueScale || 'Loading...'}</p>
-                <p className="mb-2"><strong className="text-white">Geographic Presence:</strong> {reportData?.geographicPresence || 'Loading...'}</p>
-                <p className="mb-2"><strong className="text-white">Core Offerings:</strong> {reportData?.coreOfferings || 'Loading...'}</p>
-                <p><strong className="text-white">Positioning Statement:</strong> "{reportData?.positioningStatement || 'Loading...'}"</p>
+                <p className="mb-2"><strong className="text-white">Revenue Scale:</strong> <span className="inline-block px-2 py-1 bg-radium-faint border border-radium-glow rounded text-xs text-radium-primary mx-2 font-heading">Inference</span> {safeRender(reportData?.revenueScale)}</p>
+                <p className="mb-2"><strong className="text-white">Geographic Presence:</strong> {safeRender(reportData?.geographicPresence)}</p>
+                <p className="mb-2"><strong className="text-white">Core Offerings:</strong> {safeRender(reportData?.coreOfferings)}</p>
+                <p><strong className="text-white">Positioning Statement:</strong> "{safeRender(reportData?.positioningStatement)}"</p>
               </div>
             </motion.div>
 
@@ -594,11 +609,11 @@ export default function App() {
                 <h3 className="font-heading text-sm tracking-wider text-white">02. MARKET POSITION</h3>
               </div>
               <div className="p-6 text-gray-300 text-sm flex-grow">
-                <p className="mb-2"><strong className="text-white">Brand Perception:</strong> {reportData?.brandPerception || 'Loading...'}</p>
-                <p className="mb-4"><strong className="text-white">Target Audience:</strong> {reportData?.targetAudience || 'Loading...'}</p>
+                <p className="mb-2"><strong className="text-white">Brand Perception:</strong> {safeRender(reportData?.brandPerception)}</p>
+                <p className="mb-4"><strong className="text-white">Target Audience:</strong> {safeRender(reportData?.targetAudience)}</p>
                 <div className="bg-dark-surface p-4 rounded border-l-2 border-radium-primary mb-4">
                   <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Recent Shifts</div>
-                  <div className="text-lg text-white font-semibold">{reportData?.recentShifts || 'Loading...'}</div>
+                  <div className="text-lg text-white font-semibold">{safeRender(reportData?.recentShifts)}</div>
                 </div>
               </div>
             </motion.div>
@@ -634,15 +649,15 @@ export default function App() {
               <div className="p-6 text-gray-300 text-sm flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <strong className="text-green-400 block mb-2 uppercase text-xs tracking-wider">Where {target} Leads ✅</strong>
-                  <ul className="space-y-2">{reportData.competitiveGapAnalysis.whereLeads?.map((l,i) => <li key={i} className="flex gap-2"><ChevronRight className="w-3 h-3 text-green-400 shrink-0 mt-1"/><span>{l}</span></li>)}</ul>
+                  <ul className="space-y-2">{reportData.competitiveGapAnalysis?.whereLeads?.map((l,i) => <li key={i} className="flex gap-2"><ChevronRight className="w-3 h-3 text-green-400 shrink-0 mt-1"/><span>{l}</span></li>)}</ul>
                 </div>
                 <div>
                   <strong className="text-red-400 block mb-2 uppercase text-xs tracking-wider">Where {target} Lags ❌</strong>
-                  <ul className="space-y-2">{reportData.competitiveGapAnalysis.whereLags?.map((l,i) => <li key={i} className="flex gap-2"><ChevronRight className="w-3 h-3 text-red-400 shrink-0 mt-1"/><span>{l}</span></li>)}</ul>
+                  <ul className="space-y-2">{reportData.competitiveGapAnalysis?.whereLags?.map((l,i) => <li key={i} className="flex gap-2"><ChevronRight className="w-3 h-3 text-red-400 shrink-0 mt-1"/><span>{l}</span></li>)}</ul>
                 </div>
                 <div>
                   <strong className="text-yellow-400 block mb-2 uppercase text-xs tracking-wider">Opportunities 🎯</strong>
-                  <ul className="space-y-2">{reportData.competitiveGapAnalysis.opportunities?.map((o,i) => <li key={i} className="flex gap-2"><ChevronRight className="w-3 h-3 text-yellow-400 shrink-0 mt-1"/><span>{o}</span></li>)}</ul>
+                  <ul className="space-y-2">{reportData.competitiveGapAnalysis?.opportunities?.map((o,i) => <li key={i} className="flex gap-2"><ChevronRight className="w-3 h-3 text-yellow-400 shrink-0 mt-1"/><span>{o}</span></li>)}</ul>
                 </div>
               </div>
             </motion.div>
@@ -691,7 +706,7 @@ export default function App() {
               <div className="p-6 text-gray-300 text-sm flex-grow">
                 <ul className="space-y-3">
                   {reportData?.strategicWatchouts?.map((watchout, i) => (
-                    <li key={i} className="flex gap-2 items-start"><ChevronRight className="w-4 h-4 text-red-500 shrink-0 mt-0.5"/> <span><strong className="text-white">Risk:</strong> {watchout}</span></li>
+                    <li key={i} className="flex gap-2 items-start"><ChevronRight className="w-4 h-4 text-red-500 shrink-0 mt-0.5"/> <span><strong className="text-white">Risk:</strong> {safeRender(watchout)}</span></li>
                   )) || <li>Loading...</li>}
                 </ul>
               </div>
@@ -749,14 +764,14 @@ export default function App() {
                 <div>
                   <strong className="text-white flex items-center gap-2 mb-3"><Users className="w-4 h-4"/> LinkedIn Hook</strong>
                   <div className="bg-dark-surface border border-gray-800 p-4 rounded font-mono text-[13px] leading-relaxed whitespace-pre-line text-gray-400">
-                    {reportData?.linkedinHook ? <TypewriterEffect text={reportData.linkedinHook} /> : 'Loading...'}
+                    {reportData?.linkedinHook ? <TypewriterEffect text={safeRender(reportData.linkedinHook)} /> : 'Loading...'}
                   </div>
                 </div>
                 <div>
                   <strong className="text-white flex items-center gap-2 mb-3"><Mail className="w-4 h-4"/> Email Draft</strong>
                   <div className="bg-dark-surface border border-gray-800 p-4 rounded font-mono text-[13px] leading-relaxed whitespace-pre-line text-gray-400">
                     <strong className="text-white mb-2 block">Subject: Strategic Intelligence Sync</strong>
-                    {reportData?.emailDraft ? <TypewriterEffect text={reportData.emailDraft} /> : 'Loading...'}
+                    {reportData?.emailDraft ? <TypewriterEffect text={safeRender(reportData.emailDraft)} /> : 'Loading...'}
                   </div>
                   <div className="mt-4 flex flex-col gap-2">
                     <input
