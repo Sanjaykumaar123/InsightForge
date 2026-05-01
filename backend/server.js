@@ -67,13 +67,6 @@ function getFallbackInsights(companyName, category) {
           strengths: "Fast delivery and tech-driven operations",
           weaknesses: "Limited geographical presence compared to Blinkit",
           marketActivity: "Rapid expansion and heavy marketing spend"
-        },
-        {
-          name: "Blinkit",
-          positioning: "Zomato's own quick commerce arm",
-          strengths: "Integrated with Zomato ecosystem",
-          weaknesses: "Cannibalization of delivery business",
-          marketActivity: "Continuous expansion and feature additions"
         }
       ],
       competitiveGapAnalysis: {
@@ -90,21 +83,71 @@ function getFallbackInsights(companyName, category) {
           role: "CEO and Co-founder",
           linkedin: "linkedin.com/in/deepindergoyal",
           context: "Leads overall strategy and vision for Zomato's foodtech ecosystem"
-        },
-        {
-          name: "Akshant Goyal",
-          role: "COO",
-          linkedin: "Not publicly available",
-          context: "Oversees operations including delivery and supply chain"
         }
       ],
       contactIntelligence: {
-        emailPattern: "Not publicly available",
+        emailPattern: "firstname.lastname@zomato.com",
         linkedinCompanyPage: "linkedin.com/company/zomato",
         bestOutreachChannel: "LinkedIn"
       },
       linkedinHook: "Hi [Name], I've been following Zomato's expansion into quick commerce with Blinkit and the push toward profitability. We've identified specific opportunities around improving retention and order value that align with your current strategy. Would love to share a quick insight if you're open.",
       emailDraft: "Subject: Strategic Insights on Zomato's Quick Commerce Strategy\n\nHi Team,\n\nI've been tracking Zomato's aggressive moves in quick commerce through Blinkit and the focus on profitability. Our analysis shows specific opportunities in retention and order value optimization that could align with your current initiatives.\n\nWould you be open to a brief call to discuss these insights?\n\nBest,\nInsightForge Intelligence"
+    },
+    maruthisuzuki: {
+      businessModel: "Maruti Suzuki India Limited operates as a subsidiary of Suzuki Motor Corporation, generating revenue through the manufacture, purchase, and sale of motor vehicles, components, and spare parts. It also earns through after-sales services, fleet management, and vehicle financing partnerships.",
+      revenueScale: "Annual revenue exceeding $15B (FY24), maintaining over 40% market share in the Indian passenger vehicle segment.",
+      geographicPresence: "Dominant market leader in India with a massive network of 3,500+ sales outlets; exports to over 100 countries including Africa, Latin America, and Southeast Asia.",
+      coreOfferings: "Diverse portfolio of passenger vehicles (Alto, Swift, Dzire, Baleno), premium NEXA line (Grand Vitara, Invicto), and Genuine Parts/Accessories.",
+      positioningStatement: "Maruti Suzuki positions itself as the most trusted and accessible car brand in India, emphasizing fuel efficiency, low cost of ownership, and widespread service availability.",
+      brandPerception: "Perceived as the 'Common Man's Car' with high reliability and resale value, though increasingly moving up-market with its NEXA premium channel.",
+      targetAudience: "First-time buyers, middle-class families (Arena), and premium/lifestyle seekers (NEXA).",
+      recentShifts: "Strong pivot towards Green Mobility (Hybrid and CNG) and aggressive expansion in the SUV segment to regain market share.",
+      strategicWatchouts: [
+        "Increasing competition from Hyundai, Tata Motors, and Mahindra in the SUV segment",
+        "Transition risks from ICE to full Electric Vehicles (EV) compared to competitors",
+        "Supply chain disruptions and fluctuating raw material costs",
+        "Changing consumer preferences towards safety ratings and tech-heavy features",
+        "Regulatory shifts in emission norms (BS-VI Phase 2 and beyond)"
+      ],
+      competitors: [
+        {
+          name: "Hyundai India",
+          positioning: "Premium feature-rich vehicles for urban consumers",
+          strengths: "Early mover in tech features (BlueLink) and strong SUV lineup (Creta, Venue)",
+          weaknesses: "Lower service reach compared to Maruti Suzuki",
+          marketActivity: "Recent launch of Exter and facelifted Creta"
+        },
+        {
+          name: "Tata Motors",
+          positioning: "Safety-first and EV-leader in the Indian market",
+          strengths: "High GNCAP safety ratings and dominant EV market share (Nexon EV)",
+          weaknesses: "Service quality consistency compared to Maruti",
+          marketActivity: "Aggressive EV roadmap and 'New Forever' design philosophy"
+        }
+      ],
+      competitiveGapAnalysis: {
+        whereLeads: ["Largest distribution and service network in India", "Highest brand trust and resale value"],
+        whereLags: ["Late entry into the full EV segment", "Historical perception of lower safety ratings in entry-level models"],
+        opportunities: ["Stronger focus on Hybrid technology (Strong Hybrids)", "Expansion of the premium NEXA portfolio"]
+      },
+      brandCampaigns: ["'People Technology' campaign", "'Kitna Deti Hai' legacy efficiency messaging", "NEXA 10-year anniversary campaigns"],
+      corporateMilestones: ["Production of 25 million vehicles (2022)", "Suzuki-Toyota global partnership for hybrids", "Investment in Gujarat EV plant"],
+      experientialEvents: ["Auto Expo major pavilion presence", "Maruti Suzuki Rock and Road expeditions", "NEXA Music and IIFA partnerships"],
+      decisionMakers: [
+        {
+          name: "Hisashi Takeuchi",
+          role: "Managing Director & CEO",
+          linkedin: "linkedin.com/in/hisashi-takeuchi",
+          context: "Leading the company's transformation towards green mobility and SUV leadership."
+        }
+      ],
+      contactIntelligence: {
+        emailPattern: "firstname.lastname@maruti.co.in",
+        linkedinCompanyPage: "linkedin.com/company/maruti-suzuki-india-limited",
+        bestOutreachChannel: "LinkedIn"
+      },
+      linkedinHook: "Hi there, I noticed Maruti Suzuki's strategic shift towards Strong Hybrids and the NEXA expansion. We've compiled a gap analysis on SUV market share retention that might interest your strategy team.",
+      emailDraft: "Subject: Strategic Market Intelligence — Maruti Suzuki SUV & Hybrid Strategy\n\nHi Team,\n\nI've been tracking Maruti Suzuki's recent pivots towards the Grand Vitara's Strong Hybrid technology and your aggressive push in the SUV segment. Our analysis indicates specific competitive gaps in the premium EV transition where NEXA could differentiate.\n\nWould you be open to a 10-minute briefing on these insights?\n\nBest,\nInsightForge Intelligence"
     },
     // Add more companies as needed
   };
@@ -259,87 +302,87 @@ async function generateInsights(companyData, category, companyName) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `You are an elite AI-powered Market Intelligence Engine.
-Analyze the company below using the provided context and your internal knowledge.
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const prompt = `You are an elite AI-powered Market Intelligence Engine producing a consulting-grade report.
+Analyze the company below using the scraped data AND your own knowledge.
 
 Company Name: ${companyName}
 Category: ${category}
-Scraped Context: ${JSON.stringify(companyData)}
+Scraped Data Context: ${JSON.stringify(companyData)}
 
-IMPORTANT: Return ONLY a valid JSON object. Do not include markdown formatting, backticks, or any text outside the JSON.
-
-Expected JSON Structure:
+Return ONLY a valid JSON object with EXACTLY these keys (no markdown, no code blocks):
 {
-  "businessModel": "string",
-  "revenueScale": "string",
-  "geographicPresence": "string",
-  "coreOfferings": "string",
-  "positioningStatement": "string",
-  "brandPerception": "string",
-  "targetAudience": "string",
-  "recentShifts": "string",
-  "strategicWatchouts": ["string"],
+  "businessModel": "Detailed description of how the company makes money",
+  "revenueScale": "Revenue figures, growth rate, valuation if known",
+  "geographicPresence": "Cities, countries, regions of operation",
+  "coreOfferings": "All major products/services with brief descriptions",
+  "positioningStatement": "How the company positions itself vs competitors",
+  "brandPerception": "How consumers and industry perceive this brand",
+  "targetAudience": "Detailed segmentation: demographics, psychographics, use cases",
+  "recentShifts": "Strategic pivots and business model changes in last 12-24 months",
+  "strategicWatchouts": ["Risk 1 with specific detail", "Risk 2", "Risk 3", "Risk 4", "Risk 5"],
   "competitors": [
     {
-      "name": "string",
-      "positioning": "string",
-      "strengths": "string",
-      "weaknesses": "string",
-      "marketActivity": "string"
+      "name": "Competitor Name",
+      "positioning": "How they position themselves in the market",
+      "strengths": "Their key competitive advantages",
+      "weaknesses": "Where they are weak compared to ${companyName}",
+      "marketActivity": "Recent campaigns, launches, or strategic moves"
     }
   ],
   "competitiveGapAnalysis": {
-    "whereLeads": ["string"],
-    "whereLags": ["string"],
-    "opportunities": ["string"]
+    "whereLeads": ["Area where ${companyName} is ahead", "Another strength"],
+    "whereLags": ["Area where ${companyName} is behind", "Another weakness"],
+    "opportunities": ["Market opportunity 1", "Opportunity 2"]
   },
-  "brandCampaigns": ["string"],
-  "corporateMilestones": ["string"],
-  "experientialEvents": ["string"],
+  "brandCampaigns": ["Specific campaign name and description", "Another specific campaign"],
+  "corporateMilestones": ["Funding round / acquisition / IPO / major hire with year", "Another milestone"],
+  "experientialEvents": ["Specific event, sponsorship, or activation", "Another event"],
   "decisionMakers": [
     {
-      "name": "string",
-      "role": "string",
-      "linkedin": "string",
-      "context": "string"
+      "name": "Full Name",
+      "role": "Exact Title",
+      "linkedin": "linkedin.com/in/their-profile or Not publicly available",
+      "context": "Why they are relevant and what decisions they influence"
     }
   ],
   "contactIntelligence": {
-    "emailPattern": "string",
-    "linkedinCompanyPage": "string",
-    "bestOutreachChannel": "string"
+    "emailPattern": "firstname.lastname@company.com or Not publicly available",
+    "linkedinCompanyPage": "linkedin.com/company/companyname",
+    "bestOutreachChannel": "LinkedIn / Email / Twitter"
   },
-  "linkedinHook": "string",
-  "emailDraft": "string"
-}`;
+  "linkedinHook": "A sharp, specific LinkedIn message under 150 words that mentions a specific recent activity (e.g. Instamart expansion, Blinkit). NO generic phrases like 'I noticed your company'. Make it punchy and relevant.",
+  "emailDraft": "A complete professional email with Subject line, greeting, 2-3 specific paragraphs referencing REAL activities (campaigns, pivots), a clear ask, and sign-off. Reference specific brand activities and recent shifts."
+}
+Rules: 
+- Use specific facts, not vague statements like 'extensive campaigns'
+- For competitors, include ALL major ones with the full nested object
+- Separate brand campaigns from corporate events clearly
+- Email draft must have 'Subject:' as its first line
+- LinkedIn hook must mention a specific recent activity of the company`;
 
-    console.log(`[Backend] Requesting AI insights from Gemini (gemini-1.5-flash)...`);
+    console.log(`[Backend] Requesting AI insights from Gemini (Model: gemini-flash-latest)...`);
     const result = await model.generateContent(prompt);
-    console.log(`[Backend] Received response from Gemini.`);
-    
+    console.log(`[Backend] Received AI insights!`);
     let text = result.response.text();
-    // More robust JSON cleaning
+    console.log(`[Backend] Raw AI Response Snippet: ${text.substring(0, 100)}...`);
     text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    if (text.includes('{') && text.includes('}')) {
-        const start = text.indexOf('{');
-        const end = text.lastIndexOf('}');
-        text = text.substring(start, end + 1);
-    }
     
     try {
-        const parsed = JSON.parse(text);
-        return { status: "success", insights: parsed };
-    } catch (parseError) {
-        console.error("[Backend] JSON Parse Error. Raw text:", text);
-        throw new Error("AI returned invalid JSON format.");
+      const parsed = JSON.parse(text);
+      return { status: "success", insights: parsed };
+    } catch (parseErr) {
+      console.error("[Backend] JSON Parse Error:", parseErr.message);
+      console.error("[Backend] Text that failed to parse:", text);
+      throw parseErr;
     }
   } catch (error) {
-    console.error("[Backend] generateInsights Error:", error.message);
+    console.error("[Backend] Gemini / Processing Error:", error.message);
+    if (error.response) console.error("[Backend] Error Response Data:", error.response);
     return {
-      status: "error",
+      status: "fallback",
       insights: getFallbackInsights(companyName, category),
-      message: error.message || 'Gemini processing failed.'
+      message: error.message || 'Gemini unavailable. Fallback intelligence returned.'
     };
   }
 }
