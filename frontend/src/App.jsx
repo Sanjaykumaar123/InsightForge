@@ -258,6 +258,16 @@ export default function App() {
       });
     }
 
+    // ── SECTION 8: Sales Battlecards ─────────────────
+    if (reportData.battlecards?.length) {
+      sectionHeader('08.  SALES BATTLECARDS (Win-Room Strategy)');
+      reportData.battlecards.forEach(bc => {
+        subLabel(`Targeting: ${bc.competitor}`);
+        fieldRow('How to Win', bc.howToWin);
+        fieldRow('Trap Question', bc.trapQuestion);
+      });
+    }
+
     // ── Footer on every page ──────────────────────────
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
@@ -560,6 +570,21 @@ export default function App() {
               TARGET: <span className="text-radium-primary text-glow">{target.toUpperCase()}</span> | 
               CATEGORY: <span className="text-radium-primary text-glow ml-2">{category.toUpperCase()}</span>
             </div>
+            {reportData?.readinessScore && (
+              <div className="flex items-center gap-4 bg-dark-surface border border-radium-primary/30 px-4 py-2 rounded-lg">
+                <div className="text-right">
+                  <div className="text-[10px] text-gray-500 uppercase tracking-widest">Prospect Readiness</div>
+                  <div className="text-xs text-gray-400 italic max-w-[150px] leading-tight">{reportData.readinessReason}</div>
+                </div>
+                <div className="relative w-12 h-12 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-gray-800" />
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" fill="transparent" strokeDasharray={125.6} strokeDashoffset={125.6 - (125.6 * reportData.readinessScore) / 100} className="text-radium-primary" />
+                  </svg>
+                  <span className="absolute text-xs font-bold text-white">{reportData.readinessScore}</span>
+                </div>
+              </div>
+            )}
             <div className="flex gap-4 flex-col items-end">
               <div className="flex gap-4">
                 <button
@@ -754,11 +779,44 @@ export default function App() {
               </div>
             </motion.div>
 
-            {/* 7. Personalized Outreach */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card flex flex-col col-span-1 md:col-span-2">
+            {/* 8. Competitive Battlecards — NEW INNOVATION */}
+            {reportData?.battlecards && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="glass-card flex flex-col col-span-1 md:col-span-2 border-yellow-900/30">
+                <div className="bg-dark-surface p-4 border-b border-gray-800 flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <ShieldAlert className="text-yellow-500 w-5 h-5" />
+                    <h3 className="font-heading text-sm tracking-wider text-white">08. COMPETITIVE BATTLECARDS (Win-Room Strategy)</h3>
+                  </div>
+                  <span className="bg-yellow-900/30 text-yellow-500 text-[10px] px-2 py-0.5 rounded border border-yellow-500/30 uppercase tracking-widest font-bold">Innovation v2.0</span>
+                </div>
+                <div className="p-6 text-gray-300 text-sm flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {reportData.battlecards.map((bc, i) => (
+                    <div key={i} className="bg-dark-surface border border-gray-800 p-4 rounded-lg relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+                        <Activity className="w-12 h-12 text-yellow-500" />
+                      </div>
+                      <strong className="text-white block mb-3 text-base">{bc.competitor}</strong>
+                      <div className="space-y-4">
+                        <div>
+                          <span className="text-[10px] text-yellow-500 uppercase tracking-widest block mb-1 font-bold">How to Win</span>
+                          <p className="text-gray-400 leading-relaxed">{bc.howToWin}</p>
+                        </div>
+                        <div className="bg-yellow-900/10 border border-yellow-900/30 p-3 rounded italic">
+                          <span className="text-[10px] text-white uppercase tracking-widest block mb-1 font-bold">The Trap Question</span>
+                          "{bc.trapQuestion}"
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* 9. Personalized Outreach */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-card flex flex-col col-span-1 md:col-span-2">
               <div className="bg-dark-surface p-4 border-b border-gray-800 flex items-center gap-3">
                 <Mail className="text-radium-primary w-5 h-5" />
-                <h3 className="font-heading text-sm tracking-wider text-white">07. PERSONALIZED OUTREACH</h3>
+                <h3 className="font-heading text-sm tracking-wider text-white">09. PERSONALIZED OUTREACH</h3>
               </div>
               <div className="p-6 text-gray-300 text-sm flex-grow grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -801,7 +859,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-card flex flex-col col-span-1 md:col-span-2 bg-gradient-to-br from-dark-panel to-[#001a11] border-radium-primary/30">
               <div className="bg-dark-surface p-4 border-b border-gray-800 flex items-center gap-3">
                 <Database className="text-radium-primary w-5 h-5" />
-                <h3 className="font-heading text-sm tracking-wider text-white">08. ARCHITECTURE & TRACKING (InsightForge Stack)</h3>
+                <h3 className="font-heading text-sm tracking-wider text-white">10. ARCHITECTURE & TRACKING (InsightForge Stack)</h3>
               </div>
               <div className="p-6 text-gray-300 text-sm flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>

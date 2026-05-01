@@ -232,6 +232,7 @@ const leadSchema = new mongoose.Schema({
   company: String,
   category: String,
   insights: Object,
+  readinessScore: Number, // New Innovation: Lead Scoring
   date: { type: Date, default: Date.now }
 });
 const Lead = mongoose.model('Lead', leadSchema);
@@ -352,7 +353,16 @@ Return ONLY a valid JSON object with EXACTLY these keys (no markdown, no code bl
     "bestOutreachChannel": "LinkedIn / Email / Twitter"
   },
   "linkedinHook": "A sharp, specific LinkedIn message under 150 words that mentions a specific recent activity (e.g. Instamart expansion, Blinkit). NO generic phrases like 'I noticed your company'. Make it punchy and relevant.",
-  "emailDraft": "A complete professional email with Subject line, greeting, 2-3 specific paragraphs referencing REAL activities (campaigns, pivots), a clear ask, and sign-off. Reference specific brand activities and recent shifts."
+  "emailDraft": "A complete professional email with Subject line, greeting, 2-3 specific paragraphs referencing REAL activities (campaigns, pivots), a clear ask, and sign-off. Reference specific brand activities and recent shifts.",
+  "battlecards": [
+    {
+      "competitor": "Competitor Name",
+      "howToWin": "Specific strategy to displace them",
+      "trapQuestion": "A question for the prospect that exposes this competitor's weakness"
+    }
+  ],
+  "readinessScore": 85,
+  "readinessReason": "A 1-sentence justification for the score based on recent signals (e.g., expansion, hiring, funding)"
 }
 Rules: 
 - Use specific facts, not vague statements like 'extensive campaigns'
@@ -451,7 +461,12 @@ app.post('/api/analyze', async (req, res) => {
     
     // 3. Save to DB
     if (mongoose.connection.readyState === 1) {
-      const newLead = new Lead({ company, category, insights });
+      const newLead = new Lead({ 
+        company, 
+        category, 
+        insights,
+        readinessScore: insights.insights?.readinessScore || 50 
+      });
       await newLead.save();
       console.log(`[Backend] Saved insights for ${company} to MongoDB!`);
     } else {
